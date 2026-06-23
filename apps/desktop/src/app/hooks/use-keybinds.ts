@@ -6,6 +6,7 @@ import { PANE_TOGGLE_REVEAL_EVENT } from '@/components/pane-shell'
 import { matchesQuery } from '@/hooks/use-media-query'
 import { PROFILE_SLOT_COUNT, SESSION_SLOT_COUNT } from '@/lib/keybinds/actions'
 import { comboAllowedInInput, comboFromEvent, isEditableTarget } from '@/lib/keybinds/combo'
+import { $repoStatus } from '@/store/coding-status'
 import { toggleCommandPalette } from '@/store/command-palette'
 import { $capture, $comboIndex, endCapture, setBinding, toggleKeybindPanel } from '@/store/keybinds'
 import {
@@ -141,7 +142,9 @@ export function useKeybinds(deps: KeybindRuntimeDeps): void {
     ...sessionSlotHandlers,
     'session.focusSearch': requestSessionSearchFocus,
     'session.togglePin': deps.toggleSelectedPin,
-    'workspace.newWorktree': requestNewWorktree,
+    // Only meaningful inside a git repo — a no-op otherwise (the key falls
+    // through instead of silently doing nothing).
+    'workspace.newWorktree': () => $repoStatus.get() && requestNewWorktree(),
 
     'view.toggleSidebar': () => {
       if (matchesQuery(SIDEBAR_COLLAPSE_MEDIA_QUERY)) {
